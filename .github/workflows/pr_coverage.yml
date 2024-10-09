@@ -23,27 +23,48 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-
+          
       - name: Identify changed files
         id: changed_files
         run: |
           git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
-          echo "Changed files:"
-          git diff --name-only origin/${{ github.event.pull_request.base.ref }} -- '*.py'
+          # Get the list of changed Python files
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} -- '*.py')
+          
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No Python files have changed."
+            echo "::set-output name=changed_files::"  # Empty output if no files changed
+          else
+            echo "Changed files:"
+            echo "$CHANGED_FILES"
+            # Set output so that next step can access it
+            echo "::set-output name=changed_files::$CHANGED_FILES"
+          fi
 
       - name: Run tests and collect coverage
         run: |
           coverage run -m pytest
-          coverage report
           coverage xml
         continue-on-error: true
 
-      - name: Filter coverage for changed files
+      - name: Filter coverage for changed files and generate XML
         run: |
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} -- '*.py')
-          echo "Filtering coverage for the following changed files:"
+          CHANGED_FILES="${{ steps.changed_files.outputs.changed_files }}"
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No changed Python files, skipping coverage report."
+            exit 0
+          fi
+
+          echo "Running coverage report for changed files:"
           echo "$CHANGED_FILES"
+          
+          # Generate coverage report for changed files
           coverage report --include="$CHANGED_FILES"
+          
+          # Generate XML coverage report for changed files
+          coverage xml --include="$CHANGED_FILES"
+        continue-on-error: true
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v3
@@ -68,4 +89,4 @@ jobs:
   #         message: |
   #           ```
   #           $(cat coverage.xml)
-  #           ```
+            ```
