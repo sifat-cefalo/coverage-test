@@ -17,4 +17,4 @@ def power(a: int, b: int) -> int:
 
 
 def double(a: int) -> int:
-    return multiply(a, 2)
+    return multiply(a, 3)
