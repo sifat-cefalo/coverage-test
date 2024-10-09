@@ -43,6 +43,7 @@ jobs:
       - name: Filter coverage for changed files and generate XML
         run: |
           CHANGED_FILES="${{ steps.changed_files.outputs.changed_files }}"
+          echo "Changed files: $CHANGED_FILES"
 
           if [ -z "$CHANGED_FILES" ]; then
             echo "No changed Python files, skipping coverage report."
