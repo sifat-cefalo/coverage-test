@@ -34,12 +34,12 @@ jobs:
           
           if [ -z "$CHANGED_FILES" ]; then
             echo "No Python files have changed."
-            echo "::set-output name=changed_files::"  # Empty output if no files changed
+            echo "changed_file=''" >> $CHANGED_FILES"
           else
             echo "Changed files:"
             echo "$CHANGED_FILES"
             # Set output so that next step can access it
-            echo "name=changed_files" >> $CHANGED_FILES"
+            echo "changed_file=$CHANGED_FILES" >> $CHANGED_FILES"
           fi
 
       - name: Run tests and collect coverage
