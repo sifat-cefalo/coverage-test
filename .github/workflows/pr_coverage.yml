@@ -29,7 +29,8 @@ jobs:
         run: |
           git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
           # Get the list of changed Python files
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} -- '*.py')
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} -- '*.py' | tr '\n' ',')
+          CHANGED_FILES=${CHANGED_FILES%,}
           
           if [ -z "$CHANGED_FILES" ]; then
             echo "No Python files have changed."
@@ -38,13 +39,12 @@ jobs:
             echo "Changed files:"
             echo "$CHANGED_FILES"
             # Set output so that next step can access it
-            echo "::set-output name=changed_files::$CHANGED_FILES"
+            echo "name=changed_files" >> $CHANGED_FILES"
           fi
 
       - name: Run tests and collect coverage
         run: |
           coverage run -m pytest
-          coverage xml
         continue-on-error: true
 
       - name: Filter coverage for changed files and generate XML
@@ -72,21 +72,21 @@ jobs:
           name: coverage-report
           path: coverage.xml
 
-  # comment-report:
-  #   needs: run-tests
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Download Coverage Report
-  #       uses: actions/download-artifact@v3
-  #       with:
-  #         name: coverage-report
+  comment-report:
+    needs: run-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Coverage Report
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-report
 
-  #     - name: Post coverage report to PR
-  #       uses: marocchino/sticky-pull-request-comment@v2
-  #       with:
-  #         token: ${{ secrets.GITHUB_TOKEN }}
-  #         header: Coverage Report
-  #         message: |
-  #           ```
-  #           $(cat coverage.xml)
-  #           ```
+      - name: Post coverage report to PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          header: Coverage Report
+          message: |
+            ```
+            $(cat coverage.xml)
+            ```
