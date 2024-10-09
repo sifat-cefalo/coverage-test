@@ -9,4 +9,4 @@ def say_my_name(name: str):
 
 
 def another_function(name: str):
-    return "Hello there"
+    return "Hello there hello"
