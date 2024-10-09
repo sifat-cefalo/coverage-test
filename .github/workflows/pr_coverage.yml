@@ -55,19 +55,8 @@ jobs:
           # Generate coverage report for changed files
           coverage report --include="${{ env.CHANGED_FILES }}" > coverage_report.md
 
-      - name: Read coverage report into variable
-        id: read_coverage
-        run: |
-          COVERAGE_REPORT=$(jq -Rs . coverage_report.md)  # Read the report safely
-          echo "COVERAGE_REPORT=$COVERAGE_REPORT" >> $GITHUB_ENV  # Set as environment variable
-
-      - name: Post coverage report to PR
-        if: env.CHANGED_FILES != ''
+      - name: Add Coverage PR Comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          header: Coverage Report for Changed Files
-          message: |
-            ```
-            ${{ env.COVERAGE_REPORT }}
-            ```
+          recreate: true
+          path: coverage_report.md
