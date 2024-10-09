@@ -51,7 +51,7 @@ jobs:
           echo "Running coverage report for changed files:"
           echo "${{ env.CHANGED_FILES }}"
           
-          OUTPUT=$(coverage xml -i --include="${{ env.CHANGED_FILES }}" -o coverage_report.xml || true)
+          OUTPUT=$(coverage report --format=markdown --include="${{ env.CHANGED_FILES }}" -o coverage_report.md || true)
           echo $OUTPUT
           
           # Check if the output contains "No data to report."
@@ -61,19 +61,10 @@ jobs:
           else
               echo "PUBLISH_MESSAGE=true" >> $GITHUB_ENV
           fi
-      - name: Code Coverage Report
-        uses: irongut/CodeCoverageSummary@v1.3.0
-        with:
-          filename: coverage_report.xml
-          badge: true
-          format: markdown
-          show_files: true
-          indicators: true
-          output: file
 
       - name: Add Coverage PR Comment
         if: env.PUBLISH_MESSAGE == 'true'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true
-          path: code-coverage-results.md
+          path: coverage_report.md
