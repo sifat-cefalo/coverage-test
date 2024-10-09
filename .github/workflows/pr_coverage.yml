@@ -51,7 +51,7 @@ jobs:
           echo "Running coverage report for changed files:"
           echo "${{ env.CHANGED_FILES }}"
           
-          OUTPUT=$(coverage report --format=markdown --include="${{ env.CHANGED_FILES }}" -o coverage_report.md || true)
+          OUTPUT=$(coverage report --format=markdown --include="${{ env.CHANGED_FILES }}" || true)
           echo $OUTPUT
           
           # Check if the output contains "No data to report."
@@ -60,6 +60,7 @@ jobs:
               exit 0
           else
               echo "PUBLISH_MESSAGE=true" >> $GITHUB_ENV
+              echo "$OUTPUT" > coverage_report.md
           fi
 
       - name: Add Coverage PR Comment
