@@ -14,3 +14,7 @@ def multiply(a: int, b: int) -> int:
 
 def power(a: int, b: int) -> int:
     return a ** b
+
+
+def double(a: int) -> int:
+    return multiply(a, 2)
