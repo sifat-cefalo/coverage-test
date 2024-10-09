@@ -56,12 +56,14 @@ jobs:
           
           # Check if the output contains "No data to report."
           if echo "$OUTPUT" | grep -q "No data to report."; then
-              exit 0  # Exit with status 0
+              echo "PUBLISH_MESSAGE=false" >> $GITHUB_ENV
+              exit 0
           else
-              echo "$OUTPUT"  # Print the output if coverage data exists
+              echo "PUBLISH_MESSAGE=true" >> $GITHUB_ENV
           fi
 
       - name: Add Coverage PR Comment
+        if: env.PUBLISH_MESSAGE == 'true'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true
