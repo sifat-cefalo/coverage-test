@@ -53,7 +53,7 @@ jobs:
           echo "${{ env.CHANGED_FILES }}"
           
           # Generate coverage report for changed files
-          coverage report --include="${{ env.CHANGED_FILES }}" > coverage_report.md
+          coverage report --format=markdown --include="${{ env.CHANGED_FILES }}" > coverage_report.md
 
       - name: Add Coverage PR Comment
         uses: marocchino/sticky-pull-request-comment@v2
