@@ -53,6 +53,7 @@ jobs:
           
           # Generate coverage report for changed files
           OUTPUT=$(coverage lcov -i --include="${{ env.CHANGED_FILES }}" -o coverage_report.lcov)
+          echo "$OUTPUT"
           
           if echo "$OUTPUT" | grep -q "No data to report."; then
               echo "Coverage report indicates no data to report."
