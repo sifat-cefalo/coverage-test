@@ -57,11 +57,14 @@ jobs:
 
       - name: Post coverage report to PR
         if: env.CHANGED_FILES != ''
+        run: |
+          COVERAGE_REPORT=$(cat coverage_report.md | sed 's/\`/\\`/g')  # Escape backticks if any
+          echo "COVERAGE_REPORT=$COVERAGE_REPORT" >> $GITHUB_ENV  # Set as environment variable
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           header: Coverage Report for Changed Files
           message: |
             ```
-            $(cat coverage.txt)
+            ${{ env.COVERAGE_REPORT }}
             ```
