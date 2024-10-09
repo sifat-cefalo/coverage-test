@@ -53,7 +53,7 @@ jobs:
           echo "${{ env.CHANGED_FILES }}"
           
           # Generate coverage report for changed files
-          coverage report --include="${{ env.CHANGED_FILES }}" > coverage.txt
+          coverage report --include="${{ env.CHANGED_FILES }}" > coverage_report.md
 
       - name: Upload coverage report
         if: env.CHANGED_FILES != ''
