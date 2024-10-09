@@ -40,7 +40,6 @@ jobs:
       - name: Run tests and collect coverage
         run: |
           coverage run -m pytest
-        continue-on-error: true
 
       - name: Filter coverage for changed files and generate text report
         run: |
@@ -53,10 +52,10 @@ jobs:
           echo "${{ env.CHANGED_FILES }}"
           
           # Generate coverage report for changed files
-          coverage report --format=markdown --include="${{ env.CHANGED_FILES }}" > coverage_report.md
+          coverage lcov -i --include="${{ env.CHANGED_FILES }}" -o coverage_report.lcov
 
       - name: Add Coverage PR Comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true
-          path: coverage_report.md
+          path: coverage_report.lcov
