@@ -23,7 +23,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          
+
       - name: Identify changed files
         id: changed_files
         run: |
@@ -33,32 +33,28 @@ jobs:
           CHANGED_FILES=${CHANGED_FILES%,}
 
           echo "$CHANGED_FILES"
-          echo "::set-output name=changed_files::$CHANGED_FILES"
+          echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV  # Set as environment variable
 
       - name: Run tests and collect coverage
         run: |
           coverage run -m pytest
         continue-on-error: true
 
-      - name: Filter coverage for changed files and generate XML
+      - name: Filter coverage for changed files and generate text report
         run: |
-          CHANGED_FILES="${{ steps.changed_files.outputs.changed_files }}"
-          echo "Changed files: $CHANGED_FILES"
-
-          if [ -z "$CHANGED_FILES" ]; then
+          if [ -z "${{ env.CHANGED_FILES }}" ]; then
             echo "No changed Python files, skipping coverage report."
             exit 0
           fi
 
           echo "Running coverage report for changed files:"
-          echo "$CHANGED_FILES"
+          echo "${{ env.CHANGED_FILES }}"
           
           # Generate coverage report for changed files
-          coverage report --include="${{ CHANGED_FILES }}" > coverage.txt
-        continue-on-error: true
-      
+          coverage report --include="${{ env.CHANGED_FILES }}" > coverage.txt
+
       - name: Post coverage report to PR
-        if: steps.changed_files.outputs.changed_files != ''
+        if: env.CHANGED_FILES != ''
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
