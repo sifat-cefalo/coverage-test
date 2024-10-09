@@ -32,6 +32,8 @@ jobs:
           CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} -- '*.py' | tr '\n' ',')
           CHANGED_FILES=${CHANGED_FILES%,}
           
+          echo "$CHANGED_FILES"
+          
           if [ -z "$CHANGED_FILES" ]; then
             echo "No Python files have changed."
             echo "changed_file=''" >> $CHANGED_FILES"
