@@ -67,11 +67,9 @@ jobs:
           filename: coverage_report.xml
           badge: true
           format: markdown
-          hide_branch_rate: false
-          hide_complexity: true
+          show_files: true
           indicators: true
           output: file
-          thresholds: '60 80'
 
       - name: Add Coverage PR Comment
         if: env.PUBLISH_MESSAGE == 'true'
