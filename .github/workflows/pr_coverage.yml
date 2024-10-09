@@ -6,6 +6,8 @@ on:
       - '**/*.py'  # Monitor Python files for changes
     branches:
       - main       # Run only for PRs targeting the main branch
+permissions:
+  pull-requests: write
 
 jobs:
   run-tests:
