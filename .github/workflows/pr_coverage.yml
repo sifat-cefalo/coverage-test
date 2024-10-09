@@ -40,7 +40,6 @@ jobs:
       - name: Run tests and collect coverage
         run: |
           coverage run -m pytest
-        continue-on-error: true
 
       - name: Filter coverage for changed files and generate text report
         run: |
@@ -52,10 +51,20 @@ jobs:
           echo "Running coverage report for changed files:"
           echo "${{ env.CHANGED_FILES }}"
           
-          # Generate coverage report for changed files
-          coverage report --format=markdown --include="${{ env.CHANGED_FILES }}" > coverage_report.md
+          OUTPUT=$(coverage report --format=markdown --include="${{ env.CHANGED_FILES }}" || true)
+          echo $OUTPUT
+          
+          # Check if the output contains "No data to report."
+          if echo "$OUTPUT" | grep -q "No data to report."; then
+              echo "PUBLISH_MESSAGE=false" >> $GITHUB_ENV
+              exit 0
+          else
+              echo "PUBLISH_MESSAGE=true" >> $GITHUB_ENV
+              echo "$OUTPUT" > coverage_report.md
+          fi
 
       - name: Add Coverage PR Comment
+        if: env.PUBLISH_MESSAGE == 'true'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true
