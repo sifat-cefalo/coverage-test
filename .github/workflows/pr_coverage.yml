@@ -6,6 +6,8 @@ on:
       - '**/*.py'  # Monitor Python files for changes
     branches:
       - main       # Run only for PRs targeting the main branch
+permissions:
+  pull-requests: write
 
 jobs:
   run-tests:
@@ -28,44 +30,33 @@ jobs:
         id: changed_files
         run: |
           git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
-          echo "Changed files:"
-          git diff --name-only origin/${{ github.event.pull_request.base.ref }} -- '*.py'
+          # Get the list of changed Python files
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} -- '*.py' ':!tests/*.py' | tr '\n' ',')
+          CHANGED_FILES=${CHANGED_FILES%,}
+
+          echo "$CHANGED_FILES"
+          echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV  # Set as environment variable
 
       - name: Run tests and collect coverage
         run: |
           coverage run -m pytest
-          coverage report
-          coverage xml
         continue-on-error: true
 
-      - name: Filter coverage for changed files
+      - name: Filter coverage for changed files and generate text report
         run: |
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} -- '*.py')
-          echo "Filtering coverage for the following changed files:"
-          echo "$CHANGED_FILES"
-          coverage report --include="$CHANGED_FILES"
+          if [ -z "${{ env.CHANGED_FILES }}" ]; then
+            echo "No changed Python files, skipping coverage report."
+            exit 0
+          fi
 
-      - name: Upload Coverage Report
-        uses: actions/upload-artifact@v3
+          echo "Running coverage report for changed files:"
+          echo "${{ env.CHANGED_FILES }}"
+          
+          # Generate coverage report for changed files
+          coverage report --format=markdown --include="${{ env.CHANGED_FILES }}" > coverage_report.md
+
+      - name: Add Coverage PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
-          name: coverage-report
-          path: coverage.xml
-
-  # comment-report:
-  #   needs: run-tests
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Download Coverage Report
-  #       uses: actions/download-artifact@v3
-  #       with:
-  #         name: coverage-report
-
-  #     - name: Post coverage report to PR
-  #       uses: marocchino/sticky-pull-request-comment@v2
-  #       with:
-  #         token: ${{ secrets.GITHUB_TOKEN }}
-  #         header: Coverage Report
-  #         message: |
-  #           ```
-  #           $(cat coverage.xml)
-  #           ```
+          recreate: true
+          path: coverage_report.md

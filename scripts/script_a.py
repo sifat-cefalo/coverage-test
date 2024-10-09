@@ -10,3 +10,11 @@ def subtract(a: int, b: int) -> int:
 
 def multiply(a: int, b: int) -> int:
     return a * b
+
+
+def power(a: int, b: int) -> int:
+    return a ** b
+
+
+def double(a: int) -> int:
+    return multiply(a, 2)
