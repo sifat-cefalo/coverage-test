@@ -51,7 +51,7 @@ jobs:
           echo "Running coverage report for changed files:"
           echo "${{ env.CHANGED_FILES }}"
           
-          OUTPUT=$(coverage lcov -i --include="scripts/script_d.py" -o coverage_report.lcov)
+          OUTPUT=$(coverage lcov -i --include="${{ env.CHANGED_FILES }}" -o coverage_report.lcov || true)
           echo $OUTPUT
           
           # Check if the output contains "No data to report."
