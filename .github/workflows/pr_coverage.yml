@@ -55,10 +55,10 @@ jobs:
           # Generate coverage report for changed files
           coverage report --include="${{ env.CHANGED_FILES }}" > coverage_report.md
 
-      - name: Upload coverage report
-        if: env.CHANGED_FILES != ''
+      - name: Read coverage report into variable
+        id: read_coverage
         run: |
-          COVERAGE_REPORT=$(cat coverage_report.md | sed 's/\`/\\`/g')  # Escape backticks if any
+          COVERAGE_REPORT=$(jq -Rs . coverage_report.md)  # Read the report safely
           echo "COVERAGE_REPORT=$COVERAGE_REPORT" >> $GITHUB_ENV  # Set as environment variable
 
       - name: Post coverage report to PR
