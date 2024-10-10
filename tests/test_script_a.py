@@ -6,4 +6,4 @@ def test_sum():
 
 
 def test_subtract():
-    assert custom_sum(5, 2) == 3
+    assert subtract(5, 2) == 3
