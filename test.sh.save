@@ -1,0 +1,1 @@
+"$OUTPUT" | grep -q "No data to report."
